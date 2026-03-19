@@ -1,23 +1,13 @@
-/**
- * Ü 1.3 - Lambda- und Scope Functions
- *
- * Programm zur Verarbeitung einer Kontaktliste mit Lambda-Funktionen
- * und Scope-Functions.
- *
- * ┌──────────┬───────────────────┬────────────────┬──────────────────────────────────┐
- * │ Function │ Context (this/it) │ Return Value   │ Typische Anwendung               │
- * ├──────────┼───────────────────┼────────────────┼──────────────────────────────────┤
- * │ let      │ it (Lambda-Arg)   │ Lambda-Result  │ Null-Check + Transformation      │
- * │ run      │ this (Receiver)   │ Lambda-Result  │ Objekt-Konfiguration + Berechnung│
- * │ with     │ this (Receiver)   │ Lambda-Result  │ Mehrere Ops auf einem Objekt     │
- * │ apply    │ this (Receiver)   │ Context-Objekt │ Objekt-Initialisierung           │
- * │ also     │ it (Lambda-Arg)   │ Context-Objekt │ Side-Effects (Logging etc.)      │
- * └──────────┴───────────────────┴────────────────┴──────────────────────────────────┘
- */
+// Ü 1.3 - Lambda- und Scope Functions
+//
+// Scope Functions:
+//   let   | it   | gibt Lambda-Result | Null-Checks
+//   run   | this | gibt Lambda-Result | Konfiguration + Berechnung
+//   with  | this | gibt Lambda-Result | mehrere Ops auf einem Objekt
+//   apply | this | gibt Objekt selbst | Objekt-Initialisierung
+//   also  | it   | gibt Objekt selbst | Side-Effects (Logging)
 
-/**
- * Data class Contact mit nullable Properties für Email, Phone und Age.
- */
+//data class contact 
 data class Contact(
     var name: String,
     var email: String? = null,
@@ -26,62 +16,46 @@ data class Contact(
     var address: String? = null
 )
 
-/**
- * Filtert Kontakte mit gültiger (nicht-null) Email-Adresse.
- * Verwendet die Lambda-Funktion filter{}.
- */
+// filter{} = nur Einträge behalten wo Bedingung true ist
 fun filterWithEmail(contacts: List<Contact>): List<Contact> {
     return contacts.filter { it.email != null }
 }
 
-/**
- * Erstellt eine Liste von "Name <email>" Strings.
- * Verwendet map{} zur Transformation der Kontaktliste.
- */
+// map{} = jeden Eintrag in etwas anderes umwandeln
 fun mapToNameEmail(contacts: List<Contact>): List<String> {
     return contacts
         .filter { it.email != null }
         .map { "${it.name} <${it.email}>" }
 }
 
-/**
- * Berechnet das Durchschnittsalter aller Kontakte (mit bekanntem Alter).
- * Verwendet mapNotNull{} und average() — rein funktionaler Stil.
- */
+// mapNotNull{} = wie map, überspringt null-Werte
 fun averageAge(contacts: List<Contact>): Double {
-    return contacts
-        .mapNotNull { it.age }       // Nur nicht-null Alter, Auto-Unboxing
-        .average()                     // Durchschnitt berechnen
+    return contacts.mapNotNull { it.age }.average()
 }
 
-/**
- * Sucht einen Kontakt anhand des Namens.
- * Akzeptiert eine Lambda-Funktion als Suchkriterium → flexibel erweiterbar.
- */
+// Lambda als Parameter → Suchkriterium von außen mitgeben
 fun findByName(contacts: List<Contact>, predicate: (Contact) -> Boolean): Contact? {
     return contacts.find(predicate)
 }
 
 fun main() {
-    // ============================================================
-    // INITIALISIERUNG mit Scope-Functions (apply, also)
-    // ============================================================
+    // Initialize Data
 
-    // apply: Konfiguriert ein Objekt direkt nach der Erstellung.
-    // Innerhalb des Blocks ist 'this' der Contact → Properties direkt setzbar.
+    // apply: Properties direkt setzbar im Block (this = Contact, unsichtbar).
+    //   Gibt immer das Objekt zurück → alice ist der fertige Contact.
     val alice = Contact(name = "Alice").apply {
         email = "alice@example.com"
         phone = "+43-664-1111111"
         age = 25
         address = "Hauptplatz 1, 9020 Klagenfurt"
     }
-
     val bob = Contact(name = "Bob").apply {
         email = "bob@work.at"
         age = 30
     }
 
-    // also: Führt Side-Effects aus (z.B. Logging) und gibt das Objekt zurück.
+    // also: Objekt ist 'it' (nicht this). Gut für Side-Effects wie println.
+    //   Gibt auch das Objekt zurück. it.name weil bei also das Objekt 'it' heißt.
     val charlie = Contact(name = "Charlie", age = 22).also {
         println("Kontakt erstellt: ${it.name} (kein Email)")
     }
@@ -93,72 +67,53 @@ fun main() {
         address = "Villacher Str. 10, 9020 Klagenfurt"
     }
 
-    // run: Konfiguriert Objekt UND berechnet/returned etwas.
+    // run: wie apply (this = Contact), aber gibt den LETZTEN Wert im Block zurück.
+    //   Ohne 'this' am Ende wäre eve = der phone-String statt der Contact.
     val eve = Contact(name = "Eve").run {
         email = "eve@startup.io"
         age = 35
         phone = "+43-650-5555555"
-        this  // Gibt den konfigurierten Contact zurück
+        this  // gibt den Contact zurück, nicht den letzten Wert
     }
 
-    val contacts = listOf(alice, bob, charlie, diana, eve)
 
-    // ============================================================
-    // VERARBEITUNG mit Lambda-Funktionen
-    // ============================================================
+
+
+    val contacts = listOf(alice, bob, charlie, diana, eve)
 
     println("\n--- Alle Kontakte ---")
     contacts.forEach { println("  ${it.name}, Email: ${it.email ?: "N/A"}, Alter: ${it.age ?: "?"}") }
 
-    // Filtering: Nur Kontakte mit Email
     println("\n--- Kontakte mit Email ---")
-    val withEmail = filterWithEmail(contacts)
-    withEmail.forEach { println("  ${it.name}: ${it.email}") }
+    filterWithEmail(contacts).forEach { println("  ${it.name}: ${it.email}") }
 
-    // Mapping: Name + Email als Strings
     println("\n--- Name <Email> Liste ---")
-    val nameEmails = mapToNameEmail(contacts)
-    nameEmails.forEach { println("  $it") }
+    mapToNameEmail(contacts).forEach { println("  $it") }
 
-    // Accumulation: Durchschnittsalter
     println("\n--- Durchschnittsalter ---")
-    val avgAge = averageAge(contacts)
-    println("  Durchschnitt: ${"%.1f".format(avgAge)} Jahre")
+    println("  Durchschnitt: ${"%.1f".format(averageAge(contacts))} Jahre")
 
-    // ============================================================
-    // SCOPE FUNCTIONS im Einsatz
-    // ============================================================
-
+    // let: nur ausfuehren wenn nicht null (?.let), sonst Elvis
     println("\n--- let: Nur wenn Email vorhanden ---")
-    // let: Wird nur ausgeführt wenn der Wert nicht null ist (?.let).
-    // 'it' ist der nicht-null Wert innerhalb des Blocks.
-    charlie.email?.let { email ->
-        println("  Charlie's Email: $email")
-    } ?: println("  Charlie hat keine Email-Adresse")
+    charlie.email?.let { println("  Charlie's Email: $it") }
+        ?: println("  Charlie hat keine Email-Adresse")
+    alice.email?.let { println("  Alice's Email: $it") }
 
-    alice.email?.let { email ->
-        println("  Alice's Email: $email")
-    }
-
-    println("\n--- with: Mehrere Operationen auf einem Objekt ---")
-    // with: Führt mehrere Operationen auf einem Objekt aus,
-    // ohne es jedes Mal referenzieren zu müssen. 'this' ist das Objekt.
+    // with: 'this' = diana, Properties direkt ohne diana. davor
+    println("\n--- with ---")
     with(diana) {
         println("  Name: $name")
         println("  Email: $email")
         println("  Telefon: ${phone ?: "N/A"}")
         println("  Adresse: ${address ?: "N/A"}")
-        println("  Ist volljährig: ${(age ?: 0) >= 18}")
     }
 
-    println("\n--- findByName (Lambda-basierte Suche) ---")
-    // Lambda als Suchkriterium: flexibel, wiederverwendbar
+    // findByName mit verschiedenen Lambdas als Suchkriterium
+    println("\n--- findByName ---")
     val found = findByName(contacts) { it.name == "Bob" }
-    found?.let {
-        println("  Gefunden: ${it.name}, Alter: ${it.age}")
-    } ?: println("  Nicht gefunden")
+    found?.let { println("  Gefunden: ${it.name}, Alter: ${it.age}") }
+        ?: println("  Nicht gefunden")
 
-    // Suche mit komplexerem Kriterium (auch eine Lambda)
     val over25 = findByName(contacts) { (it.age ?: 0) > 25 }
-    println("  Erster Kontakt über 25: ${over25?.name ?: "keiner"}")
+    println("  Erster ueber 25: ${over25?.name ?: "keiner"}")
 }

@@ -54,8 +54,9 @@ fun main() {
     )
 
     // Workshops hinzufügen
-    golf.workshops.addAll(listOf(workshopVienna, workshopKlagenfurt))
-    overloadedBmw.workshops.add(workshopGraz)
+    // .add() und .addAll() sind eingebaute Funktionen von MutableList
+    golf.workshops.addAll(listOf(workshopVienna, workshopKlagenfurt))  // mehrere auf einmal
+    overloadedBmw.workshops.add(workshopGraz)                          // einzeln
 
     // Alle Fahrzeuge in einer Liste
     val vehicles = listOf(golf, overloadedBmw)
