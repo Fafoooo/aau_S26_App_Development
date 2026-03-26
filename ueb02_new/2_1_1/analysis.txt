@@ -1,0 +1,44 @@
+Analysis: AndroidManifest.xml
+================================
+
+1. Four Types of App Components:
+
+- Activities: UI components that represent a single screen. Each activity provides
+  a window for the app to draw its user interface (e.g. MainActivity).
+
+- Services: Background components that perform long-running operations without a UI
+  (e.g. music playback, network operations).
+
+- Broadcast Receivers: Components that respond to system-wide broadcast events
+  (e.g. battery low, incoming SMS, boot completed).
+
+- Content Providers: Components that manage shared app data and provide a structured
+  interface to access data from other apps (e.g. contacts, media files).
+
+
+2. Entry Points:
+
+An Android app does NOT need a single unique entry point. It can have multiple entry
+points - any Activity, Service, or Broadcast Receiver can serve as an entry point.
+This differs fundamentally from desktop applications, which typically have one main()
+function as the sole entry point. In Android, the system can start any declared
+component independently, depending on user actions or system events (e.g. clicking a
+notification can directly open a specific Activity).
+
+The LAUNCHER intent-filter in the Manifest defines which Activity appears on the
+home screen, but this is not the only way to enter the app.
+
+
+3. Application Context and Class "R":
+
+- Application Context: A global context tied to the lifecycle of the entire
+  application (not a single Activity). It is used for operations that outlive a
+  single Activity, such as accessing app-wide resources, databases, or shared
+  preferences. Unlike an Activity context, it does not hold references to UI
+  elements, which avoids memory leaks.
+
+- Class "R": An auto-generated class that contains integer IDs for every resource
+  in the project (layouts, strings, drawables, etc.). It acts as a bridge between
+  XML resources and Kotlin/Java code. For example, R.layout.activity_main references
+  the activity_main.xml layout file, and R.string.app_name references the app_name
+  string resource.

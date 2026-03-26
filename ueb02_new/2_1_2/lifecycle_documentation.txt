@@ -1,0 +1,78 @@
+Activity Lifecycle Documentation
+==================================
+
+1. Logging Levels Explanation
+-----------------------------
+
+- Log.v() (Verbose): Most detailed output, lowest priority. For granular debugging.
+- Log.d() (Debug): Used during development for troubleshooting.
+- Log.i() (Info): General runtime messages, e.g. state transitions.
+- Log.w() (Warning): Potential issues that are not errors.
+- Log.e() (Error): Serious issues that impact functionality.
+
+Why avoid Log.v() and Log.d() in production?
+- Performance: Excessive logging slows down the app.
+- Security: Debug logs can leak sensitive data (user inputs, tokens, internal state).
+  Anyone with USB access can read Logcat output.
+- Storage: Logs fill the system log buffer and displace important system messages.
+
+In our implementation we use Log.d() for initialization (onCreate), Log.i() for
+state transitions, and Log.w() for destruction (onDestroy).
+
+
+2. Experiments
+--------------
+
+Experiment 1: Pressing the Home button and reopening the app
+Logs:
+  MainActivity: onPause
+  MainActivity: onStop
+  MainActivity: onRestart
+  MainActivity: onStart
+  MainActivity: onResume
+
+Description: When the Home button is pressed, the Activity is paused and then
+stopped, but NOT destroyed. It remains in memory. When the user reopens the app,
+onRestart is called (instead of onCreate), followed by onStart and onResume.
+The Activity resumes its previous state without being recreated.
+
+
+Experiment 2: Rotating the device (Configuration Change)
+Logs:
+  MainActivity: onPause
+  MainActivity: onStop
+  MainActivity: onDestroy
+  MainActivity: onCreate
+  MainActivity: onStart
+  MainActivity: onResume
+
+Description: A screen rotation triggers a configuration change. Android completely
+destroys the current Activity (onPause -> onStop -> onDestroy) and recreates it
+from scratch (onCreate -> onStart -> onResume). This is why saving state via
+onSaveInstanceState() is important - without it, all transient UI state is lost
+during rotation.
+
+
+Experiment 3: Navigating from Activity A to B and returning via Back button
+Logs:
+  MainActivity: onPause
+  SecondActivity: onCreate
+  SecondActivity: onStart
+  SecondActivity: onResume
+  MainActivity: onStop
+  --- (Back button pressed) ---
+  SecondActivity: onPause
+  MainActivity: onRestart
+  MainActivity: onStart
+  MainActivity: onResume
+  SecondActivity: onStop
+  SecondActivity: onDestroy
+
+Description: When navigating to SecondActivity, MainActivity is first paused,
+then SecondActivity is created and started. Only after SecondActivity is fully
+visible, MainActivity is stopped (but not destroyed - it stays on the back stack).
+
+When the Back button is pressed, the process reverses: SecondActivity is paused,
+MainActivity is restarted (not recreated - onRestart instead of onCreate), and
+once MainActivity is fully resumed, SecondActivity is stopped and destroyed,
+as it is removed from the back stack.
