@@ -1,11 +1,31 @@
-// Ü 1.3 - Lambda- und Scope Functions
+// Ü 1.3 – Lambda- und Scope Functions
 //
-// Scope Functions:
-//   let   | it   | gibt Lambda-Result | Null-Checks
-//   run   | this | gibt Lambda-Result | Konfiguration + Berechnung
-//   with  | this | gibt Lambda-Result | mehrere Ops auf einem Objekt
-//   apply | this | gibt Objekt selbst | Objekt-Initialisierung
-//   also  | it   | gibt Objekt selbst | Side-Effects (Logging)
+// Übersicht der Scope Functions:
+//
+// let
+//   - Zugriff: it
+//   - Rückgabe: Ergebnis des Lambda
+//   - Verwendung: Null-Checks, Transformationen
+//
+// run
+//   - Zugriff: this
+//   - Rückgabe: Ergebnis des Lambda
+//   - Verwendung: Kombination aus Initialisierung + Berechnung
+//
+// with
+//   - Zugriff: this
+//   - Rückgabe: Ergebnis des Lambda
+//   - Verwendung: Mehrere Operationen auf einem Objekt
+//
+// apply
+//   - Zugriff: this
+//   - Rückgabe: Objekt selbst
+//   - Verwendung: Objekt-Initialisierung (Builder-Style)
+//
+// also
+//   - Zugriff: it
+//   - Rückgabe: Objekt selbst
+//   - Verwendung: Side-Effects (z. B. Logging, Debugging)
 
 //data class contact 
 data class Contact(
