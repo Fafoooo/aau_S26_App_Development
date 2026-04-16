@@ -1,0 +1,42 @@
+Deep Dive: The "Stale Variable" Experiment
+============================================
+
+Experiment:
+Using a simple local variable (var myName = "User") instead of
+remember { mutableStateOf(...) }.
+
+Observation:
+When clicking the button, the UI does NOT update. The variable changes in
+the background but the greeting text stays the same.
+
+Why this happens:
+In Compose, a Composable function is re-executed (recomposed) when its state
+changes. But Compose only tracks changes to State objects (created via
+mutableStateOf). A plain local variable is recreated with its initial value
+on every recomposition and does not trigger recomposition when changed.
+
+With a regular variable:
+1. Button click changes the variable value
+2. Compose doesn't know the value changed (no State object)
+3. No recomposition is triggered
+4. UI stays the same
+
+With remember { mutableStateOf(...) }:
+1. Button click changes the State value
+2. Compose detects the State change
+3. Recomposition is triggered for affected Composables
+4. UI updates to show the new value
+
+remember {} keeps the value alive across recompositions (otherwise it would
+be reset to the initial value every time). mutableStateOf() makes Compose
+observe the value for changes.
+
+
+Recomposition Count (Layout Inspector)
+=======================================
+
+Using the Layout Inspector in Android Studio, the Greeting Composable is
+recomposed exactly once per button click when using the state-based approach.
+Only the Composables that read the changed state are recomposed - not the
+entire UI tree. This is efficient because Compose tracks which Composables
+depend on which State objects.

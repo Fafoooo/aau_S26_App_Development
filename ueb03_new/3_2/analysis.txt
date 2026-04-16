@@ -1,0 +1,26 @@
+Measurement Units in Android
+==============================
+
+dp (density-independent pixels):
+- Used for specifying layout dimensions (width, height, margins, padding)
+- 1 dp = 1 physical pixel on a 160 dpi screen
+- Scales automatically across different screen densities
+- A 100dp button looks roughly the same physical size on all devices
+- Use for: all layout measurements (sizes, spacing, padding, margins)
+
+sp (scale-independent pixels):
+- Used exclusively for text sizes
+- Same as dp but also respects the user's font size preference
+- If a user sets "Large Text" in accessibility settings, sp values scale up
+- Use for: fontSize, lineHeight
+
+px (pixels):
+- Raw screen pixels, NOT recommended for most UI work
+- Same value looks different on different screen densities
+  (e.g. 100px is big on a low-density phone, tiny on a high-density tablet)
+- Use for: drawing operations where exact pixel control is needed
+
+Summary:
+- Layout dimensions (padding, margins, size): dp
+- Text sizes: sp
+- Avoid px unless drawing low-level graphics

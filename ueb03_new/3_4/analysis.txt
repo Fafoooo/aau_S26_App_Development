@@ -1,0 +1,43 @@
+LazyColumn vs. RecyclerView Comparison
+=========================================
+
+RecyclerView (Legacy XML Approach):
+- Requires an Adapter class with onCreateViewHolder, onBindViewHolder,
+  getItemCount
+- Requires a ViewHolder class for each item type
+- Requires an XML layout file for each item layout
+- Requires a LayoutManager (LinearLayoutManager, GridLayoutManager, etc.)
+- Typically 3+ files and ~50-100 lines of boilerplate just to show a list
+- Updating the list requires notifyDataSetChanged() or DiffUtil
+
+LazyColumn (Compose):
+- Just call LazyColumn { items(list) { item -> ... } }
+- No Adapter, no ViewHolder, no separate XML files
+- Layout is defined inline as Composable functions
+- State changes automatically trigger recomposition
+- Much less code, everything in one place
+
+Both approaches share the core optimization: they only render items that
+are currently visible on screen, recycling off-screen items. RecyclerView
+does this by recycling ViewHolder instances, LazyColumn does it by only
+composing visible items.
+
+Personal take:
+LazyColumn is way more intuitive. The declarative approach makes it clear
+what each item looks like right where the list is defined. With RecyclerView,
+you're constantly jumping between the Activity, Adapter, ViewHolder, and XML
+files. The boilerplate in RecyclerView (especially for multiple item types)
+gets annoying fast compared to a simple when-expression in Compose.
+
+
+Recomposition Behavior During Scrolling
+=========================================
+
+Using the Layout Inspector while scrolling the message list:
+- Items that enter the viewport are composed (recomposition count starts at 1)
+- Items that leave the viewport are disposed (their state is cleaned up)
+- Items that stay visible are NOT recomposed during scrolling
+- Only the LazyColumn itself is recomposed to update its scroll state
+
+This matches the behavior of RecyclerView's view recycling, but is handled
+automatically by Compose without manual implementation.

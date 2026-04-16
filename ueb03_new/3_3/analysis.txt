@@ -1,0 +1,51 @@
+Stateful vs. Stateless Composables
+=====================================
+
+Stateful Composable:
+- Manages its own state internally using remember { mutableStateOf() }
+- Example: A TextField that holds its own text value
+- Convenient but harder to test and reuse, because the behavior is
+  tied to internal state
+
+Stateless Composable:
+- Does NOT hold any state, receives everything via parameters
+- State changes are reported back to the caller via callback lambdas
+- Example: A TextField that receives "value" and "onValueChange" from outside
+- Easier to test, preview, and reuse in different contexts
+
+
+State Hoisting
+================
+
+State Hoisting is the pattern of moving state out of a Composable to its
+caller, making the Composable stateless.
+
+The pattern uses two parameters:
+- value: the current state to display
+- onValueChange: a callback to request a state change
+
+Example:
+  // Stateful - manages its own state
+  @Composable
+  fun Counter() {
+      var count by remember { mutableIntStateOf(0) }
+      Button(onClick = { count++ }) { Text("Count: $count") }
+  }
+
+  // Stateless - state is hoisted to caller
+  @Composable
+  fun Counter(count: Int, onIncrement: () -> Unit) {
+      Button(onClick = onIncrement) { Text("Count: $count") }
+  }
+
+Benefits of State Hoisting:
+- Single source of truth: state lives in one place, not duplicated
+- Shareable: hoisted state can be shared with multiple Composables
+- Testable: stateless Composables can be tested with any state values
+- Decoupled: the Composable doesn't care where the state comes from
+  (could be a ViewModel, a parent Composable, etc.)
+
+In the Unit Converter app, the conversion logic and state (input value,
+selected conversion, result) are managed in the screen-level Composable.
+The individual UI elements (TextField, DropdownMenu, Button) are essentially
+stateless - they display what they receive and report interactions back.
