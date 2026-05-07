@@ -1,0 +1,63 @@
+Task 2: Gesture Detection & Path Rendering
+=============================================
+
+Drawing Logic:
+- detectDragGestures from androidx.compose.foundation.gestures.
+- onDragStart: a new points list is started for the new stroke.
+- onDrag: the pointer position is appended to the current points list.
+- onDragEnd: the collected points become a PenStroke and are stored in the
+  finished-strokes list.
+
+Path Management:
+- Each stroke is stored as a List<Offset> (x/y points in canvas pixels) plus
+  the brush width that was active when the stroke started.
+- In the draw phase, a Path is rebuilt for each stroke using moveTo on the
+  first point and lineTo for every following point, and drawn with drawPath.
+
+Persistence / separate strokes:
+- onDragStart always clears currentPoints and starts a new list, so lifting
+  the finger and touching again never connects the two strokes.
+
+Bonus Challenges:
+- Slider for brush size: the Slider writes to the brushSize state. The width
+  is captured into the stroke at onDragStart, so moving the slider later does
+  not retroactively resize old strokes.
+- Clear Canvas via long press: detectTapGestures.onLongPress wipes both the
+  finished strokes and the in-progress points.
+
+Conceptual Questions
+=====================
+
+Touch Event vs. Gesture
+------------------------
+- A Touch Event is a raw, low-level signal from the OS: "a finger went down",
+  "moved", "went up", "was cancelled". It is just position + state.
+- A Gesture is a recognised pattern built on top of several touch events,
+  e.g. Tap, Double Tap, Long Press, Drag, Pinch. It has semantics: "the user
+  wants to tap", "the user started scrolling".
+- In Compose, low-level events come from awaitPointerEvent in
+  awaitPointerEventScope. High-level gestures like detectTapGestures and
+  detectDragGestures sit on top and collapse the raw stream into meaning.
+
+Lifecycle of a touch event: Down, Move, Up, Cancel
+---------------------------------------------------
+- Down: the finger first makes contact. A new pointerId is assigned.
+- Move: the finger moves across the screen. There can be many Move events
+  per second per finger.
+- Up: the finger is lifted. The pointerId is released.
+- Cancel: the gesture is aborted (e.g. a parent container starts scrolling
+  and "steals" the pointer, or the system interrupts with a call). The
+  pointer is gone even though the finger may still be physically on screen.
+- Good gesture code must treat Cancel just as seriously as Up, otherwise you
+  end up with strokes that never finish or state that is stuck.
+
+How does Compose distinguish a Tap from the start of a Scroll?
+---------------------------------------------------------------
+- Compose looks at two things: distance moved and time elapsed.
+- If the finger goes down and is released within the tap timeout without
+  moving further than the touch slop (a small distance threshold, ~8 dp),
+  it is a Tap.
+- If the finger moves further than the touch slop while still down, the
+  gesture "wins" as a Drag / Scroll and the tap recognition is cancelled.
+- This is why a simple finger twitch doesn't register as a scroll, and why
+  a slow press that moves a bit still counts as a tap.

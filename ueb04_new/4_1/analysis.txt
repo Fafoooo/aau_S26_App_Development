@@ -1,0 +1,33 @@
+Task 1: Touch Control & Coordinate Systems
+============================================
+
+Setup:
+- Full-screen Canvas inside a Box, so a Text overlay can show the distance.
+
+Initial state:
+- The red circle is placed at a random position once, inside pointerInput
+  (where we have access to the canvas size in pixels). If redPoint is null
+  on first composition, we assign it a random Offset within the canvas.
+
+Point-to-Point Interaction:
+- detectTapGestures.onTap stores the tap position as the blue point.
+- If both points exist, drawLine draws a black line from red to blue.
+- drawCircle draws red and blue circles (radius 40 px).
+
+Distance calculation:
+- Euclidean distance is computed with kotlin.math.hypot(dx, dy), which is
+  equivalent to sqrt(dx*dx + dy*dy) but more stable for large values.
+
+UI display:
+- A Text composable is placed on top of the Canvas using
+  Box + Modifier.align(Alignment.TopCenter). This is simpler than using
+  drawText (which requires TextMeasurer or a native Paint).
+
+Bonus Challenges:
+- onDoubleTap: the red circle teleports to a new random position.
+- onLongPress: the red circle is moved to the current touch position.
+
+Coordinate system:
+- Compose's Canvas uses pixels (px), with (0,0) at the top-left corner.
+- The Offset values passed to the tap callbacks are already in the same
+  coordinate system as the Canvas draw functions, so no conversion is needed.
