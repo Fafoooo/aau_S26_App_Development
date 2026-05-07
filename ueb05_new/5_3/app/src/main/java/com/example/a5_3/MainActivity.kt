@@ -35,9 +35,9 @@ val LocalAppTextStyle = staticCompositionLocalOf { TextStyle.Default }
 data class User(val name: String, val address: String, val phone: String)
 
 val sampleUser = User(
-    name    = "John Doe",
-    address = "123 Main Street, Springfield",
-    phone   = "555-123-4567"
+    name    = "Fabio SChmickl",
+    address = "Herrengasse 1, Klagenfurt",
+    phone   = "123456789"
 )
 
 class MainActivity : ComponentActivity() {

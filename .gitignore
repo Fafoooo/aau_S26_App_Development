@@ -1,2 +1,14 @@
 *.jar
 .DS_Store
+
+# keine Riesen-Archive im Repo
+*.zip
+
+# Android Studio IDE-State (rein lokal)
+.idea/
+*.iml
+
+# Gradle / Build-Output
+.gradle/
+build/
+local.properties
